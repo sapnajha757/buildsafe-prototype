@@ -32,8 +32,13 @@ export default function Signup() {
     return projects[0]?.id || "";
   });
 
+  // New builder registration fields
+  const [companyName, setCompanyName] = useState("");
+  const [gstNumber, setGstNumber] = useState("");
+  const [activeProjectsCount, setActiveProjectsCount] = useState("");
+
   if (loading) return null;
-  if (user) return <Navigate to={user.role === "contractor" ? "/contractor" : "/worker"} replace />;
+  if (user) return <Navigate to={`/${user.role}`} replace />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -81,8 +86,21 @@ export default function Signup() {
         }
       }
 
-      const session = await signup({ name, email, password, role, workerId: generatedWorkerId });
-      navigate(session.role === "contractor" ? "/contractor" : "/worker");
+      let signupData = { name, email, password, role };
+      if (role === "worker") {
+        signupData.workerId = generatedWorkerId;
+        signupData.phone = phone || "—";
+        signupData.projectId = projectId;
+      } else if (role === "builder") {
+        signupData.companyName = companyName;
+        signupData.gstNumber = gstNumber || undefined;
+        signupData.phone = phone || "—";
+        signupData.activeProjectsCount = parseInt(activeProjectsCount) || 0;
+        signupData.projectId = projectId;
+      }
+
+      const session = await signup(signupData);
+      navigate(`/${session.role}`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -119,7 +137,7 @@ export default function Signup() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex gap-4">
+              <div className="flex gap-3">
                 <label className="flex-1 cursor-pointer">
                   <input type="radio" name="role" value="contractor" checked={role === "contractor"} onChange={(e) => setRole(e.target.value)} className="peer sr-only" />
                   <div className="border border-border bg-surface rounded-xl p-3 text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
@@ -130,6 +148,12 @@ export default function Signup() {
                   <input type="radio" name="role" value="worker" checked={role === "worker"} onChange={(e) => setRole(e.target.value)} className="peer sr-only" />
                   <div className="border border-border bg-surface rounded-xl p-3 text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
                     <p className="text-sm font-semibold text-white">Worker</p>
+                  </div>
+                </label>
+                <label className="flex-1 cursor-pointer">
+                  <input type="radio" name="role" value="builder" checked={role === "builder"} onChange={(e) => setRole(e.target.value)} className="peer sr-only" />
+                  <div className="border border-border bg-surface rounded-xl p-3 text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+                    <p className="text-sm font-semibold text-white">Builder</p>
                   </div>
                 </label>
               </div>
@@ -235,6 +259,80 @@ export default function Signup() {
                         ))}
                       </select>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {role === "builder" && (
+                <div className="space-y-4 border-t border-border pt-4 mt-2">
+                  <p className="text-[11px] font-mono text-textMuted uppercase tracking-wider">Builder Profile Details</p>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-white mb-1.5">Company/Firm Name</label>
+                      <input
+                        type="text"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        placeholder="e.g. Aravali Builders"
+                        required
+                        className="w-full text-sm border border-border bg-dark rounded-lg p-2.5 focus:outline-none focus:border-primary text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-white mb-1.5">GST Number (Optional)</label>
+                      <input
+                        type="text"
+                        value={gstNumber}
+                        onChange={(e) => setGstNumber(e.target.value)}
+                        placeholder="e.g. 07AAAAA1111A1Z1"
+                        className="w-full text-sm border border-border bg-dark rounded-lg p-2.5 focus:outline-none focus:border-primary text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-white mb-1.5">Phone Number</label>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="10-digit number"
+                        required
+                        pattern="[0-9]{10}"
+                        className="w-full text-sm border border-border bg-dark rounded-lg p-2.5 focus:outline-none focus:border-primary text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-white mb-1.5">Number of Active Projects</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={activeProjectsCount}
+                        onChange={(e) => setActiveProjectsCount(e.target.value)}
+                        placeholder="e.g. 3"
+                        required
+                        className="w-full text-sm border border-border bg-dark rounded-lg p-2.5 focus:outline-none focus:border-primary text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-white mb-1.5">Assigned Project</label>
+                    <select
+                      value={projectId}
+                      onChange={(e) => setProjectId(e.target.value)}
+                      className="w-full text-sm border border-border rounded-lg p-2.5 focus:outline-none focus:border-primary bg-dark text-white"
+                    >
+                      {projects.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               )}

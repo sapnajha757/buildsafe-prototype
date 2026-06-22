@@ -76,7 +76,7 @@ export default function Login() {
       await resetPassword(forgotEmail, newPassword);
       // Auto sign-in
       const session = await login(forgotEmail, newPassword);
-      navigate(session.role === "contractor" ? "/contractor" : "/worker");
+      navigate(`/${session.role}`);
     } catch (err) {
       setError(err.message);
     } finally {

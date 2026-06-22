@@ -92,13 +92,13 @@ export function AuthProvider({ children }) {
     );
     if (!found) throw new Error("Invalid email or password");
 
-    const session = { id: found.id, email: found.email, name: found.name, role: found.role, workerId: found.workerId };
+    const { password: _, ...session } = found;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
     setUser(session);
     return session;
   }, []);
 
-  const signup = useCallback(async ({ name, email, password, role, workerId }) => {
+  const signup = useCallback(async ({ name, email, password, role, ...extraFields }) => {
     const users = loadUsers();
     if (users.some((u) => u.email.toLowerCase() === email.toLowerCase())) {
       throw new Error("An account with this email already exists");
@@ -110,14 +110,14 @@ export function AuthProvider({ children }) {
       password,
       name,
       role,
-      workerId: role === "worker" ? workerId : undefined,
+      ...extraFields,
     };
     users.push(newUser);
     saveUsers(users);
 
     syncUser(newUser).catch(() => {});
 
-    const session = { id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role, workerId: newUser.workerId };
+    const session = { id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role, ...extraFields };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
     setUser(session);
     return session;
