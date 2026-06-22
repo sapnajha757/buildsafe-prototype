@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { HardHat, UserPlus, AlertCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { WORKERS, PROJECTS } from "../lib/seedData";
@@ -250,9 +250,13 @@ export default function Signup() {
 
             <p className="text-center text-sm text-textSecondary mt-6">
               Already have an account?{" "}
-              <Link to="/login" className="text-primary font-medium hover:underline">
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="text-primary font-medium hover:underline focus:outline-none"
+              >
                 Sign in
-              </Link>
+              </button>
             </p>
           </div>
         </div>
