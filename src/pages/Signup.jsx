@@ -244,7 +244,7 @@ export default function Signup() {
                 disabled={submitting}
                 className="w-full flex items-center justify-center gap-2 bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-dark font-display text-sm py-3 rounded-lg hover:bg-primary/90 transition-all duration-150 mt-2"
               >
-                <LogIn size={16} /> {submitting ? "Creating account…" : "Create account"}
+                <UserPlus size={16} /> {submitting ? "Creating account…" : "Create account"}
               </button>
             </form>
 
