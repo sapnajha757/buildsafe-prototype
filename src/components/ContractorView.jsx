@@ -282,7 +282,7 @@ function DisputeCard({ dispute, onResolve, lang = "en" }) {
 export default function ContractorView({
   chain, workers, projects, activeProjectId, onSwitchProject,
   onTamperDemo, onResolveDispute, onCreateProject, onAddWorker,
-  syncStatus, lang = "en",
+  syncStatus, lang = "en", searchQuery = "",
 }) {
   const t = dict[lang] || dict.en;
   const [chainStatus, setChainStatus] = useState(null);
@@ -300,6 +300,8 @@ export default function ContractorView({
     verifyChain(chain).then(setChainStatus);
   }, [chain]);
 
+  const normalizedQuery = searchQuery.toLowerCase().trim();
+
   const project = projects.find((p) => p.id === activeProjectId);
   const projectWorkers = workers.filter((w) => w.projectId === activeProjectId);
   const projectWorkerIds = new Set(projectWorkers.map((w) => w.id));
@@ -307,6 +309,42 @@ export default function ContractorView({
     if (b.data.workerId) return projectWorkerIds.has(b.data.workerId);
     if (b.data.projectId) return b.data.projectId === activeProjectId;
     return true;
+  });
+
+  const filteredProjects = projects.filter((p) => {
+    if (!normalizedQuery) return true;
+    return p.name.toLowerCase().includes(normalizedQuery) || p.id.toLowerCase().includes(normalizedQuery);
+  });
+
+  const filteredWorkers = projectWorkers.filter((w) => {
+    if (!normalizedQuery) return true;
+    return w.name.toLowerCase().includes(normalizedQuery) || w.id.toLowerCase().includes(normalizedQuery) || w.role.toLowerCase().includes(normalizedQuery);
+  });
+
+  const filteredDisputes = getOpenDisputes(projectChain).filter((d) => {
+    if (!normalizedQuery) return true;
+    return (
+      d.data.workerName?.toLowerCase().includes(normalizedQuery) ||
+      d.data.workerId?.toLowerCase().includes(normalizedQuery) ||
+      d.data.disputeId?.toLowerCase().includes(normalizedQuery) ||
+      d.data.reason?.toLowerCase().includes(normalizedQuery)
+    );
+  });
+
+  const filteredLedger = chain.filter((b) => {
+    if (!normalizedQuery) return true;
+    const workerName = b.data.workerName || "";
+    const projectName = b.data.projectName || "";
+    const txnId = b.data.txnId || "";
+    const reason = b.data.reason || "";
+    return (
+      workerName.toLowerCase().includes(normalizedQuery) ||
+      projectName.toLowerCase().includes(normalizedQuery) ||
+      txnId.toLowerCase().includes(normalizedQuery) ||
+      reason.toLowerCase().includes(normalizedQuery) ||
+      b.type.toLowerCase().includes(normalizedQuery) ||
+      String(b.index).includes(normalizedQuery)
+    );
   });
 
   const totalPaid = projectChain
@@ -341,7 +379,7 @@ export default function ContractorView({
 
       {/* Project switcher */}
       <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
-        {projects.map((p) => (
+        {filteredProjects.map((p) => (
           <button
             key={p.id}
             onClick={() => onSwitchProject(p.id)}
@@ -531,19 +569,25 @@ export default function ContractorView({
         <h3 className="font-display text-sm text-white mb-3 flex items-center gap-2">
           <Users size={16} /> {t.activeWorkersRoster}
         </h3>
-        {projectWorkers.length === 0 ? (
+        {filteredWorkers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
             <div className="bg-surface2 p-3 rounded-full">
               <Users size={20} className="text-textMuted" />
             </div>
-            <p className="font-display text-xs text-white">{t.noWorkersYet}</p>
-            <p className="text-[10px] text-textMuted max-w-[280px]">{t.noWorkersDesc}</p>
-            <button
-              onClick={() => setShowNewWorker(true)}
-              className="mt-1 flex items-center gap-1.5 text-[11px] font-display text-primary border border-primary/30 rounded-full px-3 py-1.5 hover:bg-primary/10 hover:border-primary/60 hover:scale-[1.02] active:scale-[0.97] transition-all duration-150"
-            >
-              <Plus size={12} /> {t.addWorker}
-            </button>
+            <p className="font-display text-xs text-white">
+              {searchQuery ? `No workers match "${searchQuery}"` : t.noWorkersYet}
+            </p>
+            <p className="text-[10px] text-textMuted max-w-[280px]">
+              {searchQuery ? "Try refining your search terms." : t.noWorkersDesc}
+            </p>
+            {!searchQuery && (
+              <button
+                onClick={() => setShowNewWorker(true)}
+                className="mt-1 flex items-center gap-1.5 text-[11px] font-display text-primary border border-primary/30 rounded-full px-3 py-1.5 hover:bg-primary/10 hover:border-primary/60 hover:scale-[1.02] active:scale-[0.97] transition-all duration-150"
+              >
+                <Plus size={12} /> {t.addWorker}
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto -mx-1">
@@ -559,7 +603,7 @@ export default function ContractorView({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
-                {projectWorkers.map((w) => {
+                {filteredWorkers.map((w) => {
                   const workerEvents = projectChain.filter((b) => b.data.workerId === w.id);
                   const paidWage = workerEvents
                     .filter((b) => b.type === "PAYOUT")
@@ -604,11 +648,11 @@ export default function ContractorView({
       {/* Open disputes */}
       <div className="mb-6">
         <p className="font-display text-sm text-white flex items-center gap-1.5 mb-3">
-          <AlertTriangle size={15} className="text-danger" /> {t.openDisputes} ({openDisputes.length})
+          <AlertTriangle size={15} className="text-danger" /> {t.openDisputes} ({filteredDisputes.length})
         </p>
-        {openDisputes.length > 0 ? (
+        {filteredDisputes.length > 0 ? (
           <div className="space-y-3">
-            {openDisputes.map((d) => (
+            {filteredDisputes.map((d) => (
               <DisputeCard key={d.data.disputeId} dispute={d} onResolve={onResolveDispute} lang={lang} />
             ))}
           </div>
@@ -617,8 +661,12 @@ export default function ContractorView({
             <div className="bg-primary/10 p-2.5 rounded-full text-primary">
               <ShieldCheck size={20} />
             </div>
-            <p className="font-display text-xs text-white">{t.noActiveDisputes}</p>
-            <p className="text-[10px] text-textMuted max-w-[300px]">{t.noDisputesDesc}</p>
+            <p className="font-display text-xs text-white">
+              {searchQuery ? "No matching disputes" : t.noActiveDisputes}
+            </p>
+            <p className="text-[10px] text-textMuted max-w-[300px]">
+              {searchQuery ? "Try refining your search terms." : t.noDisputesDesc}
+            </p>
           </div>
         )}
       </div>
@@ -638,16 +686,20 @@ export default function ContractorView({
       </div>
 
       <div className="space-y-0 max-h-[420px] overflow-y-auto pr-1">
-        {chain.length === 0 ? (
+        {filteredLedger.length === 0 ? (
           <div className="bg-surface border border-border rounded-xl p-6 text-center shadow-sm flex flex-col items-center justify-center gap-2 py-10">
             <div className="bg-primary/10 p-3 rounded-full text-primary">
               <FileText size={22} className="text-primary" />
             </div>
-            <p className="font-display text-sm text-white">{t.ledgerEmpty}</p>
-            <p className="text-[10px] text-textMuted max-w-[260px] leading-relaxed">{t.ledgerEmptyDesc}</p>
+            <p className="font-display text-sm text-white">
+              {searchQuery ? `No blocks match "${searchQuery}"` : t.ledgerEmpty}
+            </p>
+            <p className="text-[10px] text-textMuted max-w-[260px] leading-relaxed">
+              {searchQuery ? "Try refining your search terms." : t.ledgerEmptyDesc}
+            </p>
           </div>
         ) : (
-          chain.map((block) => (
+          filteredLedger.map((block) => (
             <BlockCard key={block.hash} block={block} />
           ))
         )}

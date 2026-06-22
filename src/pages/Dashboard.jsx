@@ -34,6 +34,7 @@ export default function Dashboard({ view }) {
   });
   const [showBuildLog, setShowBuildLog] = useState(false);
   const [toast, setToast] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
@@ -434,6 +435,8 @@ export default function Dashboard({ view }) {
       LANG_LABELS={LANG_LABELS}
       showBuildLog={showBuildLog}
       setShowBuildLog={setShowBuildLog}
+      searchQuery={searchQuery}
+      setSearchQuery={setSearchQuery}
     >
       {/* Sync message banner */}
       {syncMsg && (
@@ -465,6 +468,7 @@ export default function Dashboard({ view }) {
           policyResult={policyResult}
           onRaiseDispute={handleRaiseDispute}
           openDisputeForWorker={openDisputeForWorker}
+          searchQuery={searchQuery}
         />
       ) : view === "builder" ? (
         <BuilderView
@@ -475,12 +479,14 @@ export default function Dashboard({ view }) {
           onAddContractor={handleAddContractor}
           syncStatus={syncStatus}
           lang={lang}
+          searchQuery={searchQuery}
         />
       ) : view === "regulator" ? (
         <RegulatorView
           chain={chain}
           workers={workers}
           projects={projects}
+          searchQuery={searchQuery}
         />
       ) : (
         <ContractorView
@@ -495,6 +501,7 @@ export default function Dashboard({ view }) {
           onAddWorker={handleAddWorker}
           syncStatus={syncStatus}
           lang={lang}
+          searchQuery={searchQuery}
         />
       )}
 

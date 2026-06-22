@@ -219,7 +219,7 @@ const dict = {
 
 export default function BuilderView({
   chain, workers, projects, contractors, onAddContractor,
-  onUpdateBudget, notionStatus, lang = "en"
+  onUpdateBudget, notionStatus, lang = "en", searchQuery = ""
 }) {
   const t = dict[lang] || dict.en;
   const [showForm, setShowForm] = useState(false);
@@ -232,6 +232,31 @@ export default function BuilderView({
   React.useEffect(() => {
     verifyChain(chain).then(setChainStatus);
   }, [chain]);
+
+  const normalizedQuery = searchQuery.toLowerCase().trim();
+
+  const filteredProjects = projects.filter((p) => {
+    if (!normalizedQuery) return true;
+    const projectContractor = contractors.find((c) => c.projectId === p.id);
+    const contractorName = projectContractor ? projectContractor.name : "";
+    return (
+      p.name.toLowerCase().includes(normalizedQuery) ||
+      p.id.toLowerCase().includes(normalizedQuery) ||
+      contractorName.toLowerCase().includes(normalizedQuery)
+    );
+  });
+
+  const filteredContractors = contractors.filter((c) => {
+    if (!normalizedQuery) return true;
+    const proj = projects.find((p) => p.id === c.projectId);
+    const projName = proj ? proj.name : "";
+    return (
+      c.name.toLowerCase().includes(normalizedQuery) ||
+      c.email.toLowerCase().includes(normalizedQuery) ||
+      projName.toLowerCase().includes(normalizedQuery) ||
+      c.projectId.toLowerCase().includes(normalizedQuery)
+    );
+  });
 
   const totalAllocated = projects.reduce((sum, p) => sum + p.wageLocked, 0);
   const totalMasterBudget = contractors.reduce((sum, c) => sum + c.masterBudget, 0);
@@ -301,34 +326,38 @@ export default function BuilderView({
           <span>{t.masterWageLock}</span>
         </h3>
         <div className="space-y-4 divide-y divide-border/50">
-          {projects.map((p) => {
-            const projectContractor = contractors.find((c) => c.projectId === p.id);
-            const budgetMax = projectContractor ? projectContractor.masterBudget : 300000;
-            const percent = Math.min(100, Math.round((p.wageLocked / budgetMax) * 100));
-            return (
-              <div key={p.id} className="pt-3 first:pt-0 space-y-2">
-                <div className="flex flex-wrap items-start justify-between gap-1 text-xs">
-                  <div className="min-w-0">
-                    <span className="font-bold text-white block truncate">{p.name}</span>
-                    <p className="text-[10px] text-textMuted font-mono">
-                      {t.contractorLabel}: {projectContractor?.name || t.unassigned}
-                    </p>
+          {filteredProjects.length === 0 ? (
+            <p className="text-xs text-textMuted py-2 font-mono">No matching projects found.</p>
+          ) : (
+            filteredProjects.map((p) => {
+              const projectContractor = contractors.find((c) => c.projectId === p.id);
+              const budgetMax = projectContractor ? projectContractor.masterBudget : 300000;
+              const percent = Math.min(100, Math.round((p.wageLocked / budgetMax) * 100));
+              return (
+                <div key={p.id} className="pt-3 first:pt-0 space-y-2">
+                  <div className="flex flex-wrap items-start justify-between gap-1 text-xs">
+                    <div className="min-w-0">
+                      <span className="font-bold text-white block truncate">{p.name}</span>
+                      <p className="text-[10px] text-textMuted font-mono">
+                        {t.contractorLabel}: {projectContractor?.name || t.unassigned}
+                      </p>
+                    </div>
+                    <span className="font-mono font-semibold text-white text-right shrink-0 text-[11px]">
+                      ₹{p.wageLocked.toLocaleString("en-IN")} {t.of} ₹{budgetMax.toLocaleString("en-IN")} {t.locked} ({percent}%)
+                    </span>
                   </div>
-                  <span className="font-mono font-semibold text-white text-right shrink-0 text-[11px]">
-                    ₹{p.wageLocked.toLocaleString("en-IN")} {t.of} ₹{budgetMax.toLocaleString("en-IN")} {t.locked} ({percent}%)
-                  </span>
+                  <div className="w-full h-2.5 bg-surface2 rounded-full overflow-hidden border border-border">
+                    <div
+                      className={`h-full transition-all duration-700 rounded-full ${
+                        percent > 85 ? "bg-danger" : percent > 50 ? "bg-primary/80" : "bg-primary"
+                      }`}
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full h-2.5 bg-surface2 rounded-full overflow-hidden border border-border">
-                  <div
-                    className={`h-full transition-all duration-700 rounded-full ${
-                      percent > 85 ? "bg-danger" : percent > 50 ? "bg-primary/80" : "bg-primary"
-                    }`}
-                    style={{ width: `${percent}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
 
@@ -351,6 +380,11 @@ export default function BuilderView({
               <Plus size={12} /> {t.onboardContractor}
             </button>
           </div>
+        ) : filteredContractors.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 gap-1 text-center">
+            <p className="font-display text-xs text-white">No contractors match "{searchQuery}"</p>
+            <p className="text-[10px] text-textMuted">Try refining your search terms.</p>
+          </div>
         ) : (
           <div className="overflow-x-auto -mx-1">
             <table className="w-full min-w-[520px] text-left text-xs border-collapse">
@@ -365,7 +399,7 @@ export default function BuilderView({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
-                {contractors.map((c) => {
+                {filteredContractors.map((c) => {
                   const proj = projects.find((p) => p.id === c.projectId);
                   const activeWorkers = workers.filter((w) => w.projectId === c.projectId);
                   const payouts = chain

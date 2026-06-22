@@ -137,7 +137,7 @@ const dict = {
 export default function WorkerView({
   worker, workers, project, chain, onSwitchWorker,
   onScanComplete, onClaimWage, lastPayout, policyResult,
-  onRaiseDispute, openDisputeForWorker, lang = "en",
+  onRaiseDispute, openDisputeForWorker, lang = "en", searchQuery = "",
 }) {
   const [scanState, setScanState] = useState("idle");
   const [now, setNow] = useState(new Date());
@@ -169,7 +169,31 @@ export default function WorkerView({
     (b) => b.type === "ATTENDANCE" && b.data.workerId === worker.id
   ).length;
   const alreadyMarked = todaysAttendance > 0;
-  const history = buildWorkHistory(chain, worker.id);
+  
+  const normalizedQuery = searchQuery.toLowerCase().trim();
+  const rawHistoryBlocks = chain.filter((b) => b.data.workerId === worker.id);
+  const searchFilteredBlocks = rawHistoryBlocks.filter((b) => {
+    if (!normalizedQuery) return true;
+    const amount = b.data.amount ? String(b.data.amount) : "";
+    const method = b.data.method || "";
+    const txnId = b.data.txnId || "";
+    const reason = b.data.reason || "";
+    return (
+      b.type.toLowerCase().includes(normalizedQuery) ||
+      amount.includes(normalizedQuery) ||
+      method.toLowerCase().includes(normalizedQuery) ||
+      txnId.toLowerCase().includes(normalizedQuery) ||
+      reason.toLowerCase().includes(normalizedQuery)
+    );
+  });
+
+  const history = {
+    attendanceDays: searchFilteredBlocks.filter((b) => b.type === "ATTENDANCE").length,
+    totalEarned: searchFilteredBlocks
+      .filter((b) => b.type === "PAYOUT")
+      .reduce((sum, b) => sum + b.data.amount, 0),
+    disputesRaised: searchFilteredBlocks.filter((b) => b.type === "DISPUTE_RAISED").length,
+  };
 
   return (
     <div className="max-w-sm mx-auto space-y-5">

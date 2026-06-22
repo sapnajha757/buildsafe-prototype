@@ -40,7 +40,7 @@ function StatCard({ icon: Icon, label, value, sub, subColor = "text-textMuted", 
 const barColor = (flag) =>
   flag === "green" ? "#10b981" : flag === "yellow" ? "#f59e0b" : "#ef4444";
 
-export default function RegulatorView({ chain = [], workers = [], projects = [] }) {
+export default function RegulatorView({ chain = [], workers = [], projects = [], searchQuery = "" }) {
   const totalWages = chain
     .filter((b) => b.type === "PAYOUT")
     .reduce((s, b) => s + (b.data?.amount || 0), 0);
@@ -55,6 +55,29 @@ export default function RegulatorView({ chain = [], workers = [], projects = [] 
   const avgCompliance = Math.round(
     SITE_COMPLIANCE.reduce((s, x) => s + x.score, 0) / SITE_COMPLIANCE.length
   );
+
+  const normalizedQuery = searchQuery.toLowerCase().trim();
+
+  const filteredProjects = projects.filter((p) => {
+    if (!normalizedQuery) return true;
+    return p.name.toLowerCase().includes(normalizedQuery) || p.id.toLowerCase().includes(normalizedQuery);
+  });
+
+  const filteredChainEvents = chain.filter((b) => {
+    if (!normalizedQuery) return true;
+    const workerName = b.data?.workerName || "";
+    const projectName = b.data?.projectName || "";
+    const txnId = b.data?.txnId || "";
+    const reason = b.data?.reason || "";
+    return (
+      workerName.toLowerCase().includes(normalizedQuery) ||
+      projectName.toLowerCase().includes(normalizedQuery) ||
+      txnId.toLowerCase().includes(normalizedQuery) ||
+      reason.toLowerCase().includes(normalizedQuery) ||
+      b.type?.toLowerCase().includes(normalizedQuery) ||
+      String(b.index).includes(normalizedQuery)
+    );
+  });
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
@@ -188,15 +211,15 @@ export default function RegulatorView({ chain = [], workers = [], projects = [] 
           <div className="mt-5 pt-4 border-t border-border">
             <p className="label-mono uppercase mb-2">Recent Audit Events</p>
             <div className="space-y-1 max-h-32 overflow-y-auto">
-              {chain.slice(-5).reverse().map((b, i) => (
+              {filteredChainEvents.slice(-5).reverse().map((b, i) => (
                 <div key={i} className="flex items-center justify-between label-mono py-1 border-b border-border/50 last:border-0">
                   <span className="text-primary/70">#{b.index}</span>
                   <span>{b.type?.replace("_", " ")}</span>
                   <span>{new Date(b.timestamp).toLocaleDateString("en-IN")}</span>
                 </div>
               ))}
-              {chain.length === 0 && (
-                <p className="label-mono text-center py-2">No ledger events yet</p>
+              {filteredChainEvents.length === 0 && (
+                <p className="label-mono text-center py-2">No matching events found</p>
               )}
             </div>
           </div>
@@ -218,7 +241,7 @@ export default function RegulatorView({ chain = [], workers = [], projects = [] 
               </tr>
             </thead>
             <tbody>
-              {projects.map((p) => {
+              {filteredProjects.map((p) => {
                 const siteWorkers = workers.filter((w) => w.projectId === p.id).length;
                 return (
                   <tr key={p.id} className="border-b border-border/50 hover:bg-surface2 transition-colors">
@@ -236,8 +259,8 @@ export default function RegulatorView({ chain = [], workers = [], projects = [] 
               })}
             </tbody>
           </table>
-          {projects.length === 0 && (
-            <p className="text-xs text-textMuted text-center py-4">No projects registered yet.</p>
+          {filteredProjects.length === 0 && (
+            <p className="text-xs text-textMuted text-center py-4">No matching sites found.</p>
           )}
         </div>
       </GlowCard>
