@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import GlowCard from "./GlowCard";
 import {
   Link2, ShieldCheck, ShieldAlert, Users, IndianRupee, Activity,
   ChevronDown, ChevronUp, AlertTriangle, Plus, X, CheckCircle2, XCircle,
@@ -473,9 +474,11 @@ export default function ContractorView({
 
       {/* Stat strip */}
       <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-6">
-        <div className="bg-surface border border-border rounded-xl p-3 sm:p-4 shadow-sm">
+        <GlowCard className="p-3 sm:p-4 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <Users size={16} className="text-textMuted" />
+            <div className="icon-pulse inline-flex items-center justify-center w-6 h-6 rounded-md bg-surface2">
+              <Users size={13} className="text-textMuted" />
+            </div>
             <button
               onClick={() => setShowNewWorker(true)}
               title={t.addWorker}
@@ -484,19 +487,23 @@ export default function ContractorView({
               <Plus size={14} />
             </button>
           </div>
-          <p className="font-display text-xl text-white">{projectWorkers.length}</p>
-          <p className="text-[10px] sm:text-[11px] text-textMuted">{t.activeWorkers}</p>
-        </div>
-        <div className="bg-surface border border-border rounded-xl p-3 sm:p-4 shadow-sm">
-          <Activity size={16} className="text-primary mb-2" />
-          <p className="font-display text-xl text-white">{attendanceToday}</p>
-          <p className="text-[10px] sm:text-[11px] text-textMuted">{t.attendanceMarks}</p>
-        </div>
-        <div className="bg-surface border border-border rounded-xl p-3 sm:p-4 shadow-sm">
-          <IndianRupee size={16} className="text-primary mb-2" />
-          <p className="font-display text-xl text-white">₹{totalPaid}</p>
-          <p className="text-[10px] sm:text-[11px] text-textMuted">{t.wagesDisbursed}</p>
-        </div>
+          <p className="font-display text-xl text-white stat-shimmer">{projectWorkers.length}</p>
+          <p className="label-mono mt-0.5">{t.activeWorkers}</p>
+        </GlowCard>
+        <GlowCard className="p-3 sm:p-4 shadow-sm">
+          <div className="icon-pulse inline-flex items-center justify-center w-6 h-6 rounded-md bg-primary/10 mb-2">
+            <Activity size={13} className="text-primary" />
+          </div>
+          <p className="font-display text-xl text-white stat-shimmer">{attendanceToday}</p>
+          <p className="label-mono mt-0.5">{t.attendanceMarks}</p>
+        </GlowCard>
+        <GlowCard className="p-3 sm:p-4 shadow-sm">
+          <div className="icon-pulse inline-flex items-center justify-center w-6 h-6 rounded-md bg-primary/10 mb-2">
+            <IndianRupee size={13} className="text-primary" />
+          </div>
+          <p className="font-display text-xl text-white stat-shimmer">₹{totalPaid}</p>
+          <p className="label-mono mt-0.5">{t.wagesDisbursed}</p>
+        </GlowCard>
       </div>
 
       {/* Project + chain integrity */}

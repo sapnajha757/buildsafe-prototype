@@ -212,7 +212,14 @@ export default function DashboardLayout({
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto bg-dark">
-          {children}
+          <div className="relative min-h-full">
+            {/* Ambient glow orbs — very low opacity, add visual depth */}
+            <div className="ambient-orb ambient-orb-1" aria-hidden="true" />
+            <div className="ambient-orb ambient-orb-2" aria-hidden="true" />
+            <div className="relative z-10">
+              {children}
+            </div>
+          </div>
         </main>
       </div>
     </div>

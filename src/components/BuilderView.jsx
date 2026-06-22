@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import GlowCard from "./GlowCard";
 import { 
   Users, Landmark, ShieldCheck, AlertTriangle, Plus, X, 
   TrendingUp, Activity, CheckCircle2, Link2, BarChart3
@@ -263,26 +264,34 @@ export default function BuilderView({
 
       {/* Stats Grid — 2 cols on mobile, 4 on md+ */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-surface rounded-xl p-3 sm:p-4 border border-border shadow-sm">
-          <Landmark size={16} className="text-primary mb-2" />
-          <p className="font-display text-lg sm:text-xl text-white">₹{totalMasterBudget.toLocaleString("en-IN")}</p>
-          <p className="text-[10px] text-textMuted">{t.masterBudget}</p>
-        </div>
-        <div className="bg-surface rounded-xl p-3 sm:p-4 border border-border shadow-sm">
-          <TrendingUp size={16} className="text-primary mb-2" />
-          <p className="font-display text-lg sm:text-xl text-white">₹{totalAllocated.toLocaleString("en-IN")}</p>
-          <p className="text-[10px] text-textMuted font-mono">{t.lockedOnChain}</p>
-        </div>
-        <div className="bg-surface rounded-xl p-3 sm:p-4 border border-border shadow-sm">
-          <Users size={16} className="text-textMuted mb-2" />
-          <p className="font-display text-lg sm:text-xl text-white">{workers.length}</p>
-          <p className="text-[10px] text-textMuted">{t.crewsEnrolled}</p>
-        </div>
-        <div className="bg-surface rounded-xl p-3 sm:p-4 border border-border shadow-sm">
-          <Activity size={16} className="text-danger mb-2" />
-          <p className="font-display text-lg sm:text-xl text-white">{anomalies.length}</p>
-          <p className="text-[10px] text-textMuted">{t.riskAnomalyFlags}</p>
-        </div>
+        <GlowCard className="p-3 sm:p-4 shadow-sm">
+          <div className="icon-pulse inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 mb-2">
+            <Landmark size={14} className="text-primary" />
+          </div>
+          <p className="font-display text-lg sm:text-xl text-white stat-shimmer">₹{totalMasterBudget.toLocaleString("en-IN")}</p>
+          <p className="label-mono mt-0.5">{t.masterBudget}</p>
+        </GlowCard>
+        <GlowCard className="p-3 sm:p-4 shadow-sm">
+          <div className="icon-pulse inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 mb-2">
+            <TrendingUp size={14} className="text-primary" />
+          </div>
+          <p className="font-display text-lg sm:text-xl text-white stat-shimmer">₹{totalAllocated.toLocaleString("en-IN")}</p>
+          <p className="label-mono mt-0.5">{t.lockedOnChain}</p>
+        </GlowCard>
+        <GlowCard className="p-3 sm:p-4 shadow-sm">
+          <div className="icon-pulse inline-flex items-center justify-center w-7 h-7 rounded-lg bg-surface2 mb-2">
+            <Users size={14} className="text-textMuted" />
+          </div>
+          <p className="font-display text-lg sm:text-xl text-white stat-shimmer">{workers.length}</p>
+          <p className="label-mono mt-0.5">{t.crewsEnrolled}</p>
+        </GlowCard>
+        <GlowCard className="p-3 sm:p-4 shadow-sm" glowColor="rgba(239,68,68,0.1)">
+          <div className="icon-pulse inline-flex items-center justify-center w-7 h-7 rounded-lg bg-danger/10 mb-2">
+            <Activity size={14} className="text-danger" />
+          </div>
+          <p className="font-display text-lg sm:text-xl text-white stat-shimmer">{anomalies.length}</p>
+          <p className="label-mono mt-0.5">{t.riskAnomalyFlags}</p>
+        </GlowCard>
       </div>
 
       {/* Master Wage Budget Drawdown */}

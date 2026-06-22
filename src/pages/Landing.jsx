@@ -6,6 +6,7 @@ import {
   Lock, FileCheck, Smartphone, Zap,
 } from "lucide-react";
 import { verifyChain } from "../lib/ledger";
+import GlowCard from "../components/GlowCard";
 
 // ─── Live Ledger Stats ────────────────────────────────────────────────────────
 function useLedgerStats() {
@@ -27,16 +28,42 @@ function useLedgerStats() {
   return stats;
 }
 
-// ─── Section: Hero ────────────────────────────────────────────────────────────
+// ─── Section: Hero ────────────────────────────────────────────────────────────────────────────────
 function Hero({ onLogin }) {
   return (
     <section className="relative bg-dark text-white overflow-hidden">
       {/* Safety-stripe accent bar */}
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-primary" />
 
+      {/* Ambient glow orbs — large, very low opacity */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          width: 700, height: 700,
+          top: -200, right: -150,
+          background: "radial-gradient(circle, rgba(16,185,129,0.09) 0%, transparent 65%)",
+          filter: "blur(80px)",
+          borderRadius: "50%",
+          animation: "orbDrift1 20s ease-in-out infinite",
+        }}
+        aria-hidden="true"
+      />
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          width: 500, height: 500,
+          bottom: -100, left: -100,
+          background: "radial-gradient(circle, rgba(6,182,212,0.06) 0%, transparent 65%)",
+          filter: "blur(80px)",
+          borderRadius: "50%",
+          animation: "orbDrift2 25s ease-in-out infinite",
+        }}
+        aria-hidden="true"
+      />
+
       {/* Background texture dots */}
       <div
-        className="absolute inset-0 opacity-[0.04]"
+        className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
           backgroundSize: "28px 28px",
@@ -67,10 +94,10 @@ function Hero({ onLogin }) {
             on construction sites.
           </h1>
 
-          <p className="fade-up-3 text-textMuted text-base sm:text-lg leading-relaxed max-w-2xl mb-10">
+          <p className="fade-up-3 text-base sm:text-lg leading-relaxed max-w-2xl mb-10" style={{color:'#A0A0A8'}}>
             BuildSafe uses QR attendance, blockchain records, and automated UPI
             payments to create a tamper-proof wage trail — giving every worker
-            proof of what they're owed, and every contractor a defence against
+            proof of what they’re owed, and every contractor a defence against
             false claims.
           </p>
 
@@ -83,7 +110,8 @@ function Hero({ onLogin }) {
             </button>
             <a
               href="#how-it-works"
-              className="flex items-center gap-2 text-textMuted border border-border font-mono text-sm px-5 py-3.5 rounded-xl hover:text-white hover:border-primary/50 hover:bg-surface2 active:scale-[0.97] transition-all duration-150"
+              className="flex items-center gap-2 border border-border font-mono text-sm px-5 py-3.5 rounded-xl hover:text-white hover:border-primary/50 hover:bg-surface2 active:scale-[0.97] transition-all duration-150"
+              style={{color:'#A0A0A8'}}
             >
               See how it works
             </a>
@@ -99,8 +127,8 @@ function Hero({ onLogin }) {
           ].map((s) => (
             <div key={s.label} className="border-l-2 border-primary/30 pl-3">
               <p className="font-display text-lg sm:text-xl text-primary float-y">{s.value}</p>
-              <p className="text-[10px] text-textMuted leading-tight">{s.label}</p>
-              <p className="text-[9px] font-mono text-textMuted/70 mt-0.5">{s.note}</p>
+              <p className="label-mono leading-tight">{s.label}</p>
+              <p className="text-[9px] font-mono mt-0.5" style={{color:'#6B7280'}}>{s.note}</p>
             </div>
           ))}
         </div>
@@ -147,16 +175,18 @@ function ProblemSnapshot() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {problems.map((p, i) => (
-            <div
+            <GlowCard
               key={i}
-              className="bg-surface rounded-2xl p-5 border border-border shadow-sm flex items-start gap-4 hover:bg-surface2 transition-all duration-200"
+              className="p-5 flex items-start gap-4"
+              tilt={true}
+              borderGlow={true}
             >
               <span className="text-2xl shrink-0 mt-0.5">{p.icon}</span>
               <div>
                 <p className="text-sm text-white font-medium leading-snug">{p.text}</p>
-                <p className="text-[10px] font-mono text-textMuted mt-1.5">{p.source}</p>
+                <p className="label-mono mt-1.5">{p.source}</p>
               </div>
-            </div>
+            </GlowCard>
           ))}
         </div>
       </div>
@@ -289,17 +319,19 @@ function LiveStats({ stats }) {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {indicators.map((ind) => (
-            <div
+            <GlowCard
               key={ind.label}
-              className={`bg-surface rounded-2xl p-5 border-2 ${ind.color} shadow-sm hover:bg-surface2 transition-all duration-200`}
+              className="p-5"
+              tilt={true}
+              borderGlow={true}
             >
-              <div className="mb-3">{ind.icon}</div>
-              <p className="font-display text-2xl text-white leading-none mb-1">
+              <div className="icon-pulse inline-flex mb-3">{ind.icon}</div>
+              <p className="font-display text-2xl text-white leading-none mb-1 stat-shimmer">
                 {ind.value}
               </p>
-              <p className="text-[10px] text-textMuted leading-tight">{ind.label}</p>
-              <p className="text-[9px] font-mono text-textMuted/60 mt-1">{ind.sub}</p>
-            </div>
+              <p className="label-mono leading-tight">{ind.label}</p>
+              <p className="text-[9px] font-mono mt-1" style={{color:'#6B7280'}}>{ind.sub}</p>
+            </GlowCard>
           ))}
         </div>
 
@@ -356,9 +388,12 @@ function RoleCards({ onLogin }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {roles.map((r) => (
-            <div
+            <GlowCard
               key={r.role}
-              className="bg-surface rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 group flex flex-col"
+              className="overflow-hidden shadow-sm flex flex-col"
+              tilt={true}
+              borderGlow={true}
+              style={{ padding: 0 }}
             >
               {/* Role colour header */}
               <div className={`${r.bg} p-5 flex items-center gap-3`}>
@@ -376,21 +411,21 @@ function RoleCards({ onLogin }) {
 
                 <ul className="space-y-1.5 mb-6 flex-1">
                   {r.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-[11px] text-textMuted">
+                    <li key={f} className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                      {f}
+                      <span className="label-mono" style={{fontSize:'11px'}}>{f}</span>
                     </li>
                   ))}
                 </ul>
 
                 <button
                   onClick={() => onLogin(r.email)}
-                  className="w-full flex items-center justify-center gap-1.5 bg-surface2 text-white font-display text-xs py-3 rounded-xl hover:bg-surface3 hover:scale-[1.02] active:scale-[0.97] transition-all duration-150 shadow-sm group-hover:shadow-md"
+                  className="w-full flex items-center justify-center gap-1.5 bg-surface2 text-white font-display text-xs py-3 rounded-xl hover:bg-surface3 hover:scale-[1.02] active:scale-[0.97] transition-all duration-150 shadow-sm"
                 >
                   Sign in as {r.role} <ArrowRight size={13} />
                 </button>
               </div>
-            </div>
+            </GlowCard>
           ))}
         </div>
 

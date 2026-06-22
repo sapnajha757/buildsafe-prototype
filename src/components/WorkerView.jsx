@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { buildWorkHistory } from "../lib/ledger";
 import ReceiptModal from "./ReceiptModal";
+import GlowCard from "./GlowCard";
 
 const dict = {
   en: {
@@ -173,22 +174,22 @@ export default function WorkerView({
   return (
     <div className="max-w-sm mx-auto space-y-5">
       {/* Digital ID badge */}
-      <div className="relative bg-surface border border-border rounded-2xl p-5 shadow-xl overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
-        <div className="flex items-start justify-between mb-4">
+      <GlowCard className="p-5 shadow-xl" tilt={true} borderGlow={true}>
+        <div className="absolute top-0 left-0 right-0 h-1 bg-primary rounded-t-xl" />
+        <div className="flex items-start justify-between mb-4 mt-1">
           <div>
             <p className="text-[10px] tracking-[0.2em] text-primary font-mono uppercase mb-1">
               {t.digitalId}
             </p>
             <h2 className="font-display text-xl text-white leading-tight">{worker.name}</h2>
-            <p className="text-xs text-textSecondary mt-0.5">{worker.role} · {project?.name}</p>
+            <p className="text-xs text-textSecondary mt-0.5" style={{color:'#A0A0A8'}}>{worker.role} · {project?.name}</p>
           </div>
           <div className="bg-primary/10 border border-primary/20 rounded-lg p-1.5">
             <ShieldCheck size={20} className="text-primary" />
           </div>
         </div>
         <div className="flex items-center justify-between border-t border-border pt-3 gap-2">
-          <span className="font-mono text-xs text-textMuted truncate min-w-0">{worker.id}</span>
+          <span className="font-mono text-xs truncate min-w-0" style={{color:'#A0A0A8'}}>{worker.id}</span>
           <span className="font-mono text-xs text-primary shrink-0">₹{worker.dailyWage}/day</span>
         </div>
         <div className="absolute -bottom-2 left-0 right-0 flex justify-around px-4">
@@ -196,15 +197,14 @@ export default function WorkerView({
             <div key={i} className="w-2 h-2 rounded-full bg-dark" />
           ))}
         </div>
-      </div>
+      </GlowCard>
 
       {/* Attendance & Site QR Card */}
-      <div className="bg-surface2 border border-border rounded-2xl p-5">
+      <GlowCard className="p-5" tilt={false} borderGlow={true}>
         <div className="flex items-center justify-between mb-4">
           <p className="font-display text-sm text-white">{t.attendance}</p>
-          <span className="font-mono text-xs text-textMuted">{todayStr}</span>
+          <span className="label-mono">{todayStr}</span>
         </div>
-
         {!alreadyMarked && scanState === "idle" && (
           <div className="flex flex-col items-center gap-4">
             {/* Real SVG QR code */}
@@ -256,11 +256,11 @@ export default function WorkerView({
             </div>
           </div>
         )}
-      </div>
+      </GlowCard>
 
       {/* Wage claim */}
       {(scanState === "done" || alreadyMarked) && (
-        <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm chain-drop">
+        <GlowCard className="p-5 shadow-sm chain-drop" tilt={false} borderGlow={true}>
           <p className="font-display text-sm text-white mb-3">{t.wageStatus}</p>
           {!lastPayout ? (
             <button
@@ -297,29 +297,29 @@ export default function WorkerView({
               )}
             </div>
           )}
-        </div>
+        </GlowCard>
       )}
 
       {/* Worker Credit Reputation score teaser */}
-      <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm">
+      <GlowCard className="p-5 shadow-sm" tilt={true} borderGlow={true}>
         <h4 className="font-display text-sm text-white mb-2 flex items-center gap-2">
           <Landmark size={16} className="text-primary" />
           <span>{t.creditScoreTitle}</span>
         </h4>
         <div className="bg-surface2 rounded-xl p-3 mb-2 flex items-center justify-between border border-border">
           <div>
-            <p className="text-[11px] font-mono text-textMuted uppercase leading-none mb-1">REPUTATION LEVEL</p>
+            <p className="label-mono uppercase leading-none mb-1">REPUTATION LEVEL</p>
             <p className="font-display text-xs text-primary font-bold">{t.creditScoreSub}</p>
           </div>
           <span className="text-lg font-black text-primary font-mono">785</span>
         </div>
-        <p className="text-[10px] text-textMuted leading-relaxed">
+        <p className="text-[10px] leading-relaxed" style={{color:'#A0A0A8'}}>
           {t.creditScoreDesc}
         </p>
-      </div>
+      </GlowCard>
 
       {/* Dispute */}
-      <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm">
+      <GlowCard className="p-5 shadow-sm" tilt={false} borderGlow={true} glowColor="rgba(239,68,68,0.08)">
         <div className="flex items-center justify-between mb-2">
           <p className="font-display text-sm text-white flex items-center gap-1.5">
             <AlertTriangle size={15} className="text-danger" /> {t.dispute}
@@ -359,7 +359,7 @@ export default function WorkerView({
             {t.disputeDesc}
           </p>
         )}
-      </div>
+      </GlowCard>
 
       {/* Work history toggle */}
       <button

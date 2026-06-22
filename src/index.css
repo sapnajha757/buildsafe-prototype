@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700;800&family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,9 +8,12 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: #0a0a0a;
   color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* ── Scrollbar ─────────────────────────── */
@@ -148,4 +151,181 @@ button, select, input, textarea, a {
 .ds-input:focus {
   border-color: #10b981;
   box-shadow: 0 0 0 2px rgba(16,185,129,0.12);
+}
+
+/* ═══════════════════════════════════════════════════
+   PREMIUM INTERACTIVE GLOW CARD SYSTEM
+   ═══════════════════════════════════════════════════ */
+
+/**
+ * .glow-card
+ * Cursor-reactive spotlight card with:
+ *  1. Radial flashlight following --x / --y CSS vars (set via JS mousemove)
+ *  2. Border spotlight gradient that ignites on hover
+ *  3. 3D parallax tilt (perspective rotateX/Y via inline style from JS)
+ *  4. Spring-eased transitions so nothing feels jumpy
+ */
+.glow-card {
+  position: relative;
+  background: #141414;
+  border: 1px solid #222222;
+  border-radius: 12px;
+  /* Spring-eased tilt reset + shadow/border transitions */
+  transition:
+    transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 0.3s ease;
+  will-change: transform;
+  overflow: hidden;
+  /* Prevent layout jitter during tilt */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ── Radial spotlight layer — follows cursor inside card ── */
+.glow-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  background: radial-gradient(
+    350px circle at var(--x, -999px) var(--y, -999px),
+    var(--glow-color, rgba(34,197,94,0.15)),
+    transparent 65%
+  );
+  transition: opacity 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  z-index: 0;
+}
+.glow-card:hover::after {
+  opacity: 1;
+}
+
+/* Ensure card children sit above the spotlight layer */
+.glow-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Border spotlight glow ─────────────────────────────────
+   ::before paints a radial gradient over the border area.
+   Masked so only the 1px border ring is visible — creating a
+   "cursor-lit border" effect like Linear.app / Vercel.
+*/
+.glow-card--border {
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+.glow-card--border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 13px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  background: radial-gradient(
+    300px circle at var(--x, -999px) var(--y, -999px),
+    rgba(52,211,153,0.75),
+    rgba(16,185,129,0.3) 40%,
+    transparent 65%
+  );
+  /* Mask to only reveal the border ring */
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 1px;
+  transition: opacity 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.glow-card--border:hover::before {
+  opacity: 1;
+}
+
+/* Depth shadow on hover */
+.glow-card:hover {
+  box-shadow:
+    0 0 0 1px rgba(16,185,129,0.14),
+    0 12px 40px rgba(0,0,0,0.55),
+    0 4px 12px rgba(16,185,129,0.08);
+}
+
+/* ── Stat number shimmer on hover ─────────────────────── */
+@keyframes shimmerSlide {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.glow-card:hover .stat-shimmer {
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #34d399 35%,
+    #6ee7b7 50%,
+    #ffffff 65%,
+    #34d399 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmerSlide 2s linear infinite;
+}
+
+/* ── Pulse ring for icon badges ───────────────────────── */
+@keyframes pulseRing {
+  0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+  70%  { box-shadow: 0 0 0 7px rgba(16,185,129,0); }
+  100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+}
+.glow-card:hover .icon-pulse {
+  animation: pulseRing 1.4s ease-out infinite;
+}
+
+/* ── Monospace label (JetBrains Mono for fintech feel) ─ */
+.label-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 10px;
+  color: #A0A0A8;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+
+/* ── Ambient background glow orbs ─────────────────────── */
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+.ambient-orb-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(16,185,129,0.07) 0%, transparent 70%);
+  top: -150px;
+  right: -100px;
+  animation: orbDrift1 18s ease-in-out infinite;
+}
+.ambient-orb-2 {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 70%);
+  bottom: 100px;
+  left: -80px;
+  animation: orbDrift2 22s ease-in-out infinite;
+}
+@keyframes orbDrift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(40px, 30px) scale(1.05); }
+  66%       { transform: translate(-20px, 50px) scale(0.97); }
+}
+@keyframes orbDrift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(30px, -40px) scale(1.08); }
 }

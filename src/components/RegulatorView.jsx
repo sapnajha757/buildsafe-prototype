@@ -3,6 +3,7 @@ import {
   Cell,
 } from "recharts";
 import { ShieldCheck, AlertTriangle, Building2, TrendingUp, Eye } from "lucide-react";
+import GlowCard from "./GlowCard";
 
 const SITE_COMPLIANCE = [
   { site: "Sector-21 Metro", score: 94, flag: "green" },
@@ -19,20 +20,20 @@ const REGIONS = [
   { name: "Gujarat", pct: 90 },
 ];
 
-function StatCard({ icon: Icon, label, value, sub, subColor = "text-textMuted" }) {
+function StatCard({ icon: Icon, label, value, sub, subColor = "text-textMuted", iconBg = "bg-surface3", iconColor = "text-textMuted" }) {
   return (
-    <div className="ds-card p-5 flex flex-col gap-3">
+    <GlowCard className="p-5 flex flex-col gap-3" tilt={true} borderGlow={true}>
       <div className="flex items-start justify-between">
-        <p className="text-xs text-textMuted font-medium">{label}</p>
-        <span className="p-2 rounded-lg bg-surface3 text-textMuted">
-          <Icon size={14} />
+        <p className="label-mono uppercase">{label}</p>
+        <span className={`icon-pulse p-2 rounded-lg ${iconBg}`}>
+          <Icon size={14} className={iconColor} />
         </span>
       </div>
       <div>
-        <p className="text-2xl font-bold text-white font-display">{value}</p>
-        {sub && <p className={`text-xs mt-1 ${subColor}`}>{sub}</p>}
+        <p className="text-2xl font-bold text-white font-display stat-shimmer">{value}</p>
+        {sub && <p className={`text-xs mt-1 font-mono ${subColor}`}>{sub}</p>}
       </div>
-    </div>
+    </GlowCard>
   );
 }
 
@@ -83,6 +84,8 @@ export default function RegulatorView({ chain = [], workers = [], projects = [] 
           label="Sites monitored"
           value={SITE_COMPLIANCE.length}
           sub={`${projects.length} registered`}
+          iconBg="bg-primary/10"
+          iconColor="text-primary"
         />
         <StatCard
           icon={AlertTriangle}
@@ -90,6 +93,8 @@ export default function RegulatorView({ chain = [], workers = [], projects = [] 
           value={openDisputes.length}
           sub={`${openDisputes.length > 0 ? openDisputes.length : 0} high priority`}
           subColor={openDisputes.length > 0 ? "text-danger" : "text-textMuted"}
+          iconBg={openDisputes.length > 0 ? "bg-danger/10" : "bg-surface3"}
+          iconColor={openDisputes.length > 0 ? "text-danger" : "text-textMuted"}
         />
         <StatCard
           icon={ShieldCheck}
@@ -97,6 +102,8 @@ export default function RegulatorView({ chain = [], workers = [], projects = [] 
           value={`₹${(totalWages / 1000).toFixed(1)}K`}
           sub="100% on-chain verified"
           subColor="text-primary"
+          iconBg="bg-primary/10"
+          iconColor="text-primary"
         />
         <StatCard
           icon={TrendingUp}
@@ -104,35 +111,37 @@ export default function RegulatorView({ chain = [], workers = [], projects = [] 
           value={`${avgCompliance}%`}
           sub="↗ 3.2% vs last period"
           subColor="text-primary"
+          iconBg="bg-primary/10"
+          iconColor="text-primary"
         />
       </div>
 
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Compliance by site */}
-        <div className="ds-card p-5">
+        <GlowCard className="p-5" tilt={false} borderGlow={true}>
           <p className="text-sm font-semibold text-white mb-4">Compliance Score by Site</p>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={SITE_COMPLIANCE} barSize={28}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
               <XAxis
                 dataKey="site"
-                tick={{ fontSize: 10, fill: "#71717a" }}
+                tick={{ fontSize: 10, fill: "#A0A0A8", fontFamily: "JetBrains Mono, monospace" }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis
                 domain={[0, 100]}
-                tick={{ fontSize: 10, fill: "#71717a" }}
+                tick={{ fontSize: 10, fill: "#A0A0A8", fontFamily: "JetBrains Mono, monospace" }}
                 axisLine={false}
                 tickLine={false}
                 unit="%"
               />
               <Tooltip
-                contentStyle={{ background: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: 8, fontSize: 12 }}
+                contentStyle={{ background: "#141414", border: "1px solid #2a2a2a", borderRadius: 8, fontSize: 12, fontFamily: "JetBrains Mono, monospace" }}
                 labelStyle={{ color: "#fff" }}
-                itemStyle={{ color: "#a1a1aa" }}
-                cursor={{ fill: "rgba(255,255,255,0.03)" }}
+                itemStyle={{ color: "#A0A0A8" }}
+                cursor={{ fill: "rgba(16,185,129,0.05)" }}
               />
               <Bar dataKey="score" radius={[4, 4, 0, 0]}>
                 {SITE_COMPLIANCE.map((entry, idx) => (
@@ -143,16 +152,16 @@ export default function RegulatorView({ chain = [], workers = [], projects = [] 
           </ResponsiveContainer>
           <div className="flex items-center gap-4 mt-3 justify-center">
             {[["green", "#10b981", "≥ 85%"], ["yellow", "#f59e0b", "65–84%"], ["red", "#ef4444", "< 65%"]].map(([key, color, label]) => (
-              <span key={key} className="flex items-center gap-1.5 text-[10px] text-textMuted">
+              <span key={key} className="flex items-center gap-1.5 label-mono">
                 <span className="w-2.5 h-2.5 rounded-sm" style={{ background: color }} />
                 {label}
               </span>
             ))}
           </div>
-        </div>
+        </GlowCard>
 
         {/* Regional compliance progress */}
-        <div className="ds-card p-5">
+        <GlowCard className="p-5" tilt={false} borderGlow={true}>
           <p className="text-sm font-semibold text-white mb-4">Compliance by Region</p>
           <div className="space-y-4">
             {REGIONS.map((r) => {
@@ -161,7 +170,7 @@ export default function RegulatorView({ chain = [], workers = [], projects = [] 
               return (
                 <div key={r.name}>
                   <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-xs text-textMuted">{r.name}</span>
+                    <span className="label-mono">{r.name}</span>
                     <span className="text-xs font-mono font-semibold" style={{ color }}>{r.pct}%</span>
                   </div>
                   <div className="h-1.5 w-full bg-surface3 rounded-full overflow-hidden">
@@ -177,25 +186,25 @@ export default function RegulatorView({ chain = [], workers = [], projects = [] 
 
           {/* On-chain audit trail */}
           <div className="mt-5 pt-4 border-t border-border">
-            <p className="text-xs font-semibold text-textMuted mb-2">Recent Audit Events</p>
+            <p className="label-mono uppercase mb-2">Recent Audit Events</p>
             <div className="space-y-1 max-h-32 overflow-y-auto">
               {chain.slice(-5).reverse().map((b, i) => (
-                <div key={i} className="flex items-center justify-between text-[10px] font-mono text-textMuted py-1 border-b border-border/50 last:border-0">
+                <div key={i} className="flex items-center justify-between label-mono py-1 border-b border-border/50 last:border-0">
                   <span className="text-primary/70">#{b.index}</span>
                   <span>{b.type?.replace("_", " ")}</span>
                   <span>{new Date(b.timestamp).toLocaleDateString("en-IN")}</span>
                 </div>
               ))}
               {chain.length === 0 && (
-                <p className="text-[10px] text-textMuted text-center py-2">No ledger events yet</p>
+                <p className="label-mono text-center py-2">No ledger events yet</p>
               )}
             </div>
           </div>
-        </div>
+        </GlowCard>
       </div>
 
       {/* Registered sites table */}
-      <div className="ds-card p-5">
+      <GlowCard className="p-5" tilt={false} borderGlow={true}>
         <p className="text-sm font-semibold text-white mb-4">Registered Sites</p>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
@@ -231,7 +240,7 @@ export default function RegulatorView({ chain = [], workers = [], projects = [] 
             <p className="text-xs text-textMuted text-center py-4">No projects registered yet.</p>
           )}
         </div>
-      </div>
+      </GlowCard>
     </div>
   );
 }

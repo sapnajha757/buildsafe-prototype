@@ -17,8 +17,9 @@ export default {
         primaryMuted: "rgba(16,185,129,0.12)",
         // Text
         textPrimary: "#ffffff",
-        textSecondary: "#a1a1aa",
-        textMuted: "#71717a",
+        textSecondary: "#d1d5db",
+        textMuted: "#A0A0A8",
+        textSubtle: "#6B7280",
         // Status colors
         success: "#10b981",
         warning: "#f59e0b",
